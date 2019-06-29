@@ -1,16 +1,7 @@
-import torch
-import torch.nn as nn
 import numpy as np
 import pandas as pd
-import seaborn as snsㄴ
-from scipy.stats import skew
-from scipy.special import boxcox1p
-from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler
-from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import Lasso, LassoCV
-import json
-import datetime
 
 train = pd.read_csv("./train.csv")
 test = pd.read_csv("./test.csv")
