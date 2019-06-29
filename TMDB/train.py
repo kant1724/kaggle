@@ -52,13 +52,13 @@ sc = RobustScaler()
 train_len = train.shape[0]
 train = all[:train_len]
 test = all[train_len:]
-train.drop('id', axis=1)
+train = train.drop('id', axis=1)
 x = sc.fit_transform(train)
 
 model = Lasso(alpha=0.005, random_state=1)
 model.fit(x, y)
 
-test.drop('id', axis=1)
+test = test.drop('id', axis=1)
 x = sc.transform(test)
 
 pred = model.predict(x)
