@@ -1,14 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import RobustScaler
-import torch
-import torch.nn as nn
-
-input_size = 34
-num_classes = 1
-num_epochs = 10000
-batch_size = 100
-learning_rate = 0.001
+from sklearn.svm import SVC
 
 train = pd.read_csv("./train.csv")
 test = pd.read_csv("./test.csv")
@@ -16,35 +9,17 @@ test2 = pd.read_csv("./test.csv")
 
 y = []
 for tt in train['Survived']:
-    y.append([tt])
+    y.append(tt)
 y = np.array(y, dtype=np.long)
 all = pd.concat([train, test], ignore_index=True, sort=False)
 all = all.loc[:, ['PassengerId', 'Pclass', 'SibSp', 'Parch', 'Sex', 'Age', 'Fare', 'Embarked', 'Name']]
-all['Age'] = all['Age'].fillna(20)
-a = all['Age']
-for i in range(len(a)):
-    if a[i] <= 10:
-        a[i] = 'a'
-    elif a[i] <= 20:
-        a[i] = 'b'
-    elif a[i] <= 30:
-        a[i] = 'c'
-    elif a[i] <= 40:
-        a[i] = 'd'
-    elif a[i] <= 50:
-        a[i] = 'e'
-    elif a[i] <= 60:
-        a[i] = 'f'
-    else:
-        a[i] = 'g'
+all['Age'] = all['Age'].fillna(all['Age'].mean())
+all['Fare'] = all['Fare'].fillna(all['Fare'].mean())
+all['Age'] = all['Age'] / 5
 
 a = all['Name']
 for i in range(len(a)):
     a[i] = a[i].split(', ')[1].split('. ')[0]
-
-all['Fare'] = all['Fare'] / 100
-
-all.to_csv('./table.csv')
 
 all = pd.get_dummies(all)
 
@@ -56,35 +31,22 @@ test = test.drop('PassengerId', axis=1)
 
 sc = RobustScaler()
 
-# Logistic regression model
-model = nn.Linear(input_size, num_classes)
-
-criterion = nn.MSELoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
 x = train.to_numpy()
 #x = sc.fit_transform(x)
 
-# Train the model
-for epoch in range(num_epochs):
-    inputs = torch.from_numpy(x.astype(np.float32))
-    targets = torch.from_numpy(y.astype(np.float32))
-
-    outputs = model(inputs)
-    loss = criterion(outputs, targets)
-
-    # Backward and optimize
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+clf = SVC(kernel='linear')
+clf.fit(x, y)
+test = test.fillna(0)
 
 x = test.to_numpy()
 #x = sc.transform(x)
 
-predicted = model(torch.from_numpy(x.astype(np.float32))).detach().numpy()
+predicted = clf.predict(x)
+
 preds = []
+mean = predicted.mean()
 for p in predicted:
-    if p[0] > 0.5:
+    if p > mean:
         preds.append(1)
     else:
         preds.append(0)
