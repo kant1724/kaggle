@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import RobustScaler
-from sklearn.svm import SVC
+from xgboost import XGBClassifier
 
 train = pd.read_csv("./train.csv")
 test = pd.read_csv("./test.csv")
@@ -13,9 +13,7 @@ for tt in train['Survived']:
 y = np.array(y, dtype=np.long)
 all = pd.concat([train, test], ignore_index=True, sort=False)
 all = all.loc[:, ['PassengerId', 'Pclass', 'SibSp', 'Parch', 'Sex', 'Fare', 'Embarked', 'Name']]
-#all['Age'] = all['Age'].fillna(all['Age'].mean())
 all['Fare'] = all['Fare'].fillna(all['Fare'].mean())
-#all['Age'] = all['Age'] / 5
 
 a = all['Name']
 for i in range(len(a)):
@@ -32,16 +30,17 @@ test = test.drop('PassengerId', axis=1)
 sc = RobustScaler()
 
 x = train.to_numpy()
-#x = sc.fit_transform(x)
+x = sc.fit_transform(x)
 
-clf = SVC(kernel='linear')
-clf.fit(x, y)
+model = XGBClassifier()
+model.fit(x, y)
+
 test = test.fillna(0)
 
 x = test.to_numpy()
-#x = sc.transform(x)
+x = sc.transform(x)
 
-predicted = clf.predict(x)
+predicted = model.predict(x)
 
 preds = []
 mean = predicted.mean()
