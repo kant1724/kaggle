@@ -63,8 +63,6 @@ grouped_train = combined.iloc[:891].groupby(['Sex','Pclass','Title'])
 grouped_median_train = grouped_train.median()
 grouped_median_train = grouped_median_train.reset_index()[['Sex', 'Pclass', 'Title', 'Age']]
 
-print(grouped_median_train)
-
 def fill_age(row):
     condition = (
         (grouped_median_train['Sex'] == row['Sex']) &
