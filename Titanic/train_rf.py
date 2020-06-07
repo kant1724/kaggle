@@ -2,7 +2,7 @@ import warnings
 warnings.filterwarnings('ignore')
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 
-from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 
 import pandas as pd
 pd.options.display.max_columns = 100
@@ -144,20 +144,6 @@ combined = process_pclass()
 
 def process_ticket():
     global combined
-
-    def cleanTicket(ticket):
-        ticket = ticket.replace('.', '')
-        ticket = ticket.replace('/', '')
-        ticket = ticket.split()
-        ticket = map(lambda t: t.strip(), ticket)
-        ticket = list(filter(lambda t: not t.isdigit(), ticket))
-        if len(ticket) > 0:
-            return ticket[0]
-        else:
-            return 'XXX'
-    combined['Ticket'] = combined['Ticket'].map(cleanTicket)
-    tickets_dummies = pd.get_dummies(combined['Ticket'], prefix='Ticket')
-    combined = pd.concat([combined, tickets_dummies], axis=1)
     combined.drop('Ticket', inplace=True, axis=1)
 
     return combined
@@ -177,8 +163,6 @@ def process_family():
 
 combined = process_family()
 
-combined.to_csv('./table.csv')
-
 def recover_train_test_target():
     global combined
 
@@ -192,6 +176,8 @@ test2 = pd.read_csv("./test.csv")
 
 train, test, y = recover_train_test_target()
 x = train.to_numpy()
+clf = RandomForestClassifier(n_estimators= 50, max_features='sqrt')
+clf.fit(x, y)
 test = test.fillna(0)
 
 x = test.to_numpy()
